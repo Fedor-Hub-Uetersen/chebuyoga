@@ -44,10 +44,7 @@
 
     <div class="overlay" id="overlay">
         <div class="content">
-            
-            <!-- Твой медитирующий Чебурашка -->
             <img class="cheburashka-photo" src="chebi.jpg" alt="Чебурашка медитирует">
-            
             <h2>Время разминки! 🧘‍♂️</h2>
             <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
             <div class="timer" id="r-timer" style="color: var(--accent);">02:00</div>
@@ -69,32 +66,42 @@
 
     <script>
         // --- НАСТРОЙКИ (в секундах) ---
-        const WORK_DURATION = 60;   // 1 минута работы (потом поменяешь на 3600 для часа)
+        const WORK_DURATION = 60;   // 1 минута работы для теста
         const REST_DURATION = 120;  // 2 минуты отдыха
         const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
         // ------------------------------
 
         let timer = null;
+        let notificationSent = false;
         const wEl = document.getElementById('w-timer');
         const rEl = document.getElementById('r-timer');
         const ovEl = document.getElementById('overlay');
-        const statusEl = document.getElementById('status-text');
         const musicAudio = document.getElementById('bg-music');
         
         musicAudio.src = MUSIC_URL;
+
+        // Запрос разрешения на системные уведомления Windows
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
 
         function format(seconds) {
             if (seconds < 0) seconds = 0;
             return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`;
         }
 
-        // Главный цикл управления временем
+        function sendNotification(title, body) {
+            if (Notification.permission === "granted" && !notificationSent) {
+                new Notification(title, { body: body, icon: 'chebi.jpg' });
+                notificationSent = true;
+            }
+        }
+
         function updateTimer() {
             const now = Math.floor(Date.now() / 1000);
             let endTime = parseInt(localStorage.getItem('chebu_endTime')) || 0;
             let mode = localStorage.getItem('chebu_mode') || 'work';
 
-            // Если таймер запускается впервые или сброшен
             if (endTime === 0) {
                 endTime = now + WORK_DURATION;
                 localStorage.setItem('chebu_endTime', endTime);
@@ -105,22 +112,23 @@
             let timeLeft = endTime - now;
 
             if (timeLeft <= 0) {
-                // Если рабочее время вышло — переключаемся на отдых
                 if (mode === 'work') {
                     localStorage.setItem('chebu_mode', 'rest');
                     localStorage.setItem('chebu_endTime', now + REST_DURATION);
                     ovEl.classList.add('active');
                     wEl.innerText = format(0);
                     rEl.innerText = format(REST_DURATION);
+                    
+                    // Посылаем сигнал на рабочий стол Windows!
+                    sendNotification("Чебурашка зовёт!", "Фёдор, пораbasic-оваться! Время разминки.");
                 } else {
-                    // Если время отдыха вышло — возвращаемся к работе
                     startWorkMode();
                 }
             } else {
-                // Обычный отсчёт времени
                 if (mode === 'work') {
                     ovEl.classList.remove('active');
                     wEl.innerText = format(timeLeft);
+                    notificationSent = false; // Сбрасываем флаг для следующего раза
                 } else {
                     ovEl.classList.add('active');
                     rEl.innerText = format(timeLeft);
@@ -138,14 +146,13 @@
             musicAudio.currentTime = 0;
             
             wEl.innerText = format(WORK_DURATION);
+            notificationSent = false;
         }
 
-        // Запуск интервала (проверка каждую секунду)
         clearInterval(timer);
         timer = setInterval(updateTimer, 1000);
-        updateTimer(); // Инициализация при старте
+        updateTimer();
 
-        // Кнопки
         document.getElementById('m-btn').addEventListener('click', () => {
             musicAudio.play().catch(e => console.log("Звук заблокирован"));
         });
