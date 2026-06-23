@@ -29,7 +29,7 @@
         .btn-group { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; }
         .btn { background: transparent; color: #ffcc80; border: 2px solid var(--accent); padding: 12px 25px; font-size: 16px; border-radius: 25px; cursor: pointer; transition: all 0.2s; }
         .btn:hover { background: var(--accent); color: #121212; transform: scale(1.05); }
-        .btn-m { border-color: var(--music); color: #a5d6a7; }
+        .btn-m { border-color: var(--music); color: #a5d6a7; min-width: 220px; } /* Немного расширил кнопку для длинного текста */
         .btn-m:hover { background: var(--music); color: #121212; }
     </style>
 </head>
@@ -44,7 +44,6 @@
     <div class="overlay" id="overlay">
         <div class="content">
             
-            <!-- ИСПРАВЛЕНО: Теперь тут строго прописано muted для автозапуска -->
             <video class="my-video" id="yoga-video" controls preload="auto" loop muted>
                 <source src="video.mp4" type="video/mp4">
                 Ваш браузер не поддерживает видео.
@@ -70,9 +69,11 @@
     <audio id="bg-music" preload="auto" loop></audio>
 
     <script>
-        const WORK_DURATION = 60;   
-        const REST_DURATION = 120;  
+        // --- НАСТРОЙКИ (в секундах) ---
+        const WORK_DURATION = 60;   // 1 минута работы для теста
+        const REST_DURATION = 120;  // 2 минуты отдыха
         const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+        // ------------------------------
 
         let timer = null;
         let notificationSent = false;
@@ -81,6 +82,7 @@
         const ovEl = document.getElementById('overlay');
         const musicAudio = document.getElementById('bg-music');
         const videoPlayer = document.getElementById('yoga-video');
+        const musicBtn = document.getElementById('m-btn');
         
         musicAudio.src = MUSIC_URL;
 
@@ -122,8 +124,8 @@
                     wEl.innerText = format(0);
                     rEl.innerText = format(REST_DURATION);
                     
-                    // Теперь видео заведётся без проблем!
-                    videoPlayer.play().catch(e => console.log("Браузер заблокировал старт"));
+                    // Автозапуск мультика на фоне
+                    videoPlayer.play().catch(e => console.log("Браузер ждет клика"));
                     
                     sendNotification("Чебурашка зовёт!", "Фёдор, пораbasic-оваться! Время разминки.");
                 } else {
@@ -147,10 +149,12 @@
             localStorage.setItem('chebu_endTime', now + WORK_DURATION);
             ovEl.classList.remove('active');
             
+            // Всё выключаем и сбрасываем кнопку обратно
             musicAudio.pause();
             musicAudio.currentTime = 0;
             videoPlayer.pause();
             videoPlayer.currentTime = 0;
+            musicBtn.innerText = "🎵 Включить музыку релакс";
             
             wEl.innerText = format(WORK_DURATION);
             notificationSent = false;
@@ -160,8 +164,20 @@
         timer = setInterval(updateTimer, 1000);
         updateTimer();
 
-        document.getElementById('m-btn').addEventListener('click', () => {
-            musicAudio.play().catch(e => console.log("Звук заблокирован"));
+        // --- ЛОГИКА КНОПКИ-ПЕРЕКЛЮЧАТЕЛЯ ---
+        musicBtn.addEventListener('click', () => {
+            if (musicAudio.paused) {
+                // Если музыка стояла на паузе — включаем её и меняем текст
+                musicAudio.play()
+                    .then(() => {
+                        musicBtn.innerText = "⏸ Поставить на паузу";
+                    })
+                    .catch(e => console.log("Звук заблокирован"));
+            } else {
+                // Если музыка играла — выключаем её и возвращаем текст
+                musicAudio.pause();
+                musicBtn.innerText = "🎵 Включить музыку релакс";
+            }
         });
 
         document.getElementById('s-btn').addEventListener('click', startWorkMode);
