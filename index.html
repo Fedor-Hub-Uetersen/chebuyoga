@@ -162,18 +162,18 @@
         <div class="status" id="status-text">До разминки осталось:</div>
         <div class="timer" id="w-timer" style="color: #fff; text-shadow: var(--neon-glow);">01:00</div>
         
-        <!-- НАСТРОЙКА ЗВУКА ГОНГА -->
+        <!-- НАСТРОЙКА ЗВУКА С НАДЕЖНЫМИ MP3 ССЫЛКАМИ -->
         <div class="sound-selector">
             <label for="alarm-sound-select">🔔 Сигнал разминки:</label>
             <select id="alarm-sound-select">
-                <option value="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg">Цифровой сигнал</option>
+                <option value="https://www.soundjay.com/buttons/sounds/button-10.mp3">Цифровой сигнал</option>
                 <option value="https://actions.google.com/sounds/v1/ambiences/gong.ogg" selected>Космический гонг</option>
-                <option value="https://actions.google.com/sounds/v1/foley/singing_bowl.ogg">Тибетская чаша</option>
+                <option value="https://www.soundjay.com/clock/sounds/bell-ringing-05.mp3">Тибетский колокол</option>
             </select>
         </div>
 
         <div class="footer-credits">
-            © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | +49017661566356
+            © Tech.<a href="https://chebur.shop" target="_blank">chebur.shop</a> | +49017661566356
         </div>
     </div>
 
@@ -181,16 +181,16 @@
         <div class="content">
             <video class="my-video" id="yoga-video" controls preload="auto" loop muted>
                 <source src="video.mp4" type="video/mp4">
-                Ваш браузер не поддерживает видео.
+                Ваш браузер не поддерживает video.
             </video>
             
             <h2 style="text-shadow: var(--neon-glow);">Время разминки! 🧘‍♂️</h2>
-            <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже расправь плечи и вытяни хвост!»</div>
+            <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
             <div class="timer" id="r-timer" style="color: var(--music); text-shadow: var(--neon-music);">02:00</div>
             
             <ul class="exercises">
                 <li>👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.</li>
-                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись руками вверх.</li>
+                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.</li>
                 <li>💧 <strong>Вода:</strong> Сделай пару глотков чистой воды.</li>
             </ul>
 
@@ -200,18 +200,17 @@
             </div>
 
             <div class="footer-credits" style="color: #444;">
-                © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | +49017661566356
+                © Tech.<a href="https://chebur.shop" target="_blank">chebur.shop</a> | +49017661566356
             </div>
         </div>
     </div>
 
-    <!-- Аудио-плееры для музыки и для гонга -->
     <audio id="bg-music" preload="auto" loop></audio>
     <audio id="alarm-sound" preload="auto"></audio>
 
     <script>
-        const WORK_DURATION = 60;   // 1 минута работы для теста (потом сделаешь 3600)
-        const REST_DURATION = 120;  // 2 минуты отдыха
+        const WORK_DURATION = 60;   
+        const REST_DURATION = 120;  
         const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
 
         let timer = null;
@@ -238,7 +237,6 @@
             return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`;
         }
 
-        // Обновление и показ счётчика разминок
         function updateStreakDisplay() {
             let currentStreak = parseInt(localStorage.getItem('chebu_streak')) || 0;
             streakEl.innerText = `Bio-Score: ${currentStreak}`;
@@ -280,14 +278,15 @@
                     wEl.innerText = format(0);
                     rEl.innerText = format(REST_DURATION);
                     
-                    // Запуск мультика и выбранного гонга
                     videoPlayer.play().catch(e => console.log("Ждем клика"));
-                    alarmAudio.src = soundSelect.value;
-                    alarmAudio.play().catch(e => console.log("Браузер блокирует автозвук"));
                     
-                    sendNotification("Чебурашка зовёт!", "Друг, пора размяться!");
+                    // БРОНЕБОЙНЫЙ ЗАПУСК СИГНАЛА
+                    alarmAudio.src = soundSelect.value;
+                    alarmAudio.load(); // Принудительно перезагружаем файл в память
+                    alarmAudio.play().catch(e => console.log("Браузер заблокировал автозвук"));
+                    
+                    sendNotification("Чебурашка зовёт!", "Фёдор, пора размяться!");
                 } else {
-                    // Если время отдыха закончилось само по таймеру — засчитываем балл
                     incrementStreak();
                     startWorkMode();
                 }
@@ -321,14 +320,21 @@
             notificationSent = false;
         }
 
+        // Тестовое прослушивание сигнала прямо при выборе в меню!
+        soundSelect.addEventListener('change', () => {
+            alarmAudio.src = soundSelect.value;
+            alarmAudio.load();
+            alarmAudio.play().catch(e => console.log("Кликните по экрану для теста звука"));
+            // Выключаем через 2 секунды, чтобы не надоедал
+            setTimeout(() => { alarmAudio.pause(); alarmAudio.currentTime = 0; }, 2000);
+        });
+
         clearInterval(timer);
         timer = setInterval(updateTimer, 1000);
         
-        // Старт системы
         updateStreakDisplay();
         updateTimer();
 
-        // Логика кнопок
         musicBtn.addEventListener('click', () => {
             if (musicAudio.paused) {
                 musicAudio.play()
@@ -341,7 +347,6 @@
         });
 
         document.getElementById('s-btn').addEventListener('click', () => {
-            // Если нажал кнопку возврата вручную во время разминки — тоже засчитываем балл
             if (localStorage.getItem('chebu_mode') === 'rest') {
                 incrementStreak();
             }
