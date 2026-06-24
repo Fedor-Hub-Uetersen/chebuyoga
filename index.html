@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChebuYoga — Tech.chebur.shop </title>
+    <title>ChebuYoga — Tech.chebur.shop</title>
     <style>
         :root { 
             --bg: #0a0a0c; 
             --card: #121216; 
             --text: #ffffff; 
-            --accent: #ff5500; /* Яркий неоновый оранжевый */
-            --music: #00ff66;  /* Кислотно-зеленый неон */
+            --accent: #ff5500; 
+            --music: #00ff66;  
             --neon-glow: 0 0 15px var(--accent), 0 0 30px var(--accent);
             --neon-music: 0 0 15px var(--music);
         }
@@ -28,7 +28,6 @@
             overflow: hidden; 
         }
 
-        /* Неоновый контейнер */
         .container { 
             position: relative;
             text-align: center; 
@@ -40,7 +39,6 @@
             width: 380px; 
         }
 
-        /* Счётчик разминок в углу */
         .streak-counter {
             position: absolute;
             top: 15px;
@@ -53,7 +51,6 @@
             text-transform: uppercase;
         }
 
-        /* Блок логотипа */
         .logo-area {
             margin-bottom: 20px;
             display: flex;
@@ -63,14 +60,15 @@
         }
 
         .wolf-logo-placeholder {
-            font-size: 22px;
+            font-size: 18px; 
             font-weight: bold;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             color: #fff;
             text-shadow: var(--neon-glow);
             border: 1px dashed rgba(255, 85, 0, 0.4);
             padding: 10px 20px;
             border-radius: 10px;
+            text-transform: uppercase;
         }
 
         .wolf-logo-img {
@@ -84,7 +82,6 @@
         .timer { font-size: 68px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 10px #fff; }
         .status { font-size: 14px; color: #8a8a93; letter-spacing: 1px; text-transform: uppercase; }
         
-        /* Блок выбора звука гонга */
         .sound-selector {
             margin: 15px 0 5px 0;
             display: flex;
@@ -150,11 +147,10 @@
 <body>
 
     <div class="container">
-        <!-- СЧЁТЧИК РАЗМИНОК -->
         <div class="streak-counter" id="streak-display">Bio-Score: 0</div>
 
         <div class="logo-area">
-            <div class="wolf-logo-placeholder" id="wolf-text">Tech.chebur.shop</div>
+            <div class="wolf-logo-placeholder" id="wolf-text">TECH.CHEBUR.SHOP</div>
             <img src="wolf.png" alt="BioWolf Logo" class="wolf-logo-img" id="wolf-img">
         </div>
 
@@ -162,13 +158,13 @@
         <div class="status" id="status-text">До разминки осталось:</div>
         <div class="timer" id="w-timer" style="color: #fff; text-shadow: var(--neon-glow);">01:00</div>
         
-        <!-- НАСТРОЙКА ЗВУКА С НАДЕЖНЫМИ MP3 ССЫЛКАМИ -->
+        <!-- НАСТРОЙКА: Имена файлов, которые лежат в твоей папке ПК -->
         <div class="sound-selector">
             <label for="alarm-sound-select">🔔 Сигнал разминки:</label>
             <select id="alarm-sound-select">
-                <option value="https://www.soundjay.com/buttons/sounds/button-10.mp3">Цифровой сигнал</option>
-                <option value="https://actions.google.com/sounds/v1/ambiences/gong.ogg" selected>Космический гонг</option>
-                <option value="https://www.soundjay.com/clock/sounds/bell-ringing-05.mp3">Тибетский колокол</option>
+                <option value="digital.mp3">Цифровой сигнал</option>
+                <option value="gong.mp3" selected>Космический гонг</option>
+                <option value="bowl.mp3">Тибетская чаша</option>
             </select>
         </div>
 
@@ -185,12 +181,12 @@
             </video>
             
             <h2 style="text-shadow: var(--neon-glow);">Время разминки! 🧘‍♂️</h2>
-            <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже,расправь плечи и вытяни хвост!»</div>
+            <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
             <div class="timer" id="r-timer" style="color: var(--music); text-shadow: var(--neon-music);">02:00</div>
             
             <ul class="exercises">
                 <li>👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.</li>
-                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.</li>
+                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись руками вверх и вытяни хвост.</li>
                 <li>💧 <strong>Вода:</strong> Сделай пару глотков чистой воды.</li>
             </ul>
 
@@ -280,10 +276,10 @@
                     
                     videoPlayer.play().catch(e => console.log("Ждем клика"));
                     
-                    // БРОНЕБОЙНЫЙ ЗАПУСК СИГНАЛА
+                    // Запуск твоего локального файла звука
                     alarmAudio.src = soundSelect.value;
-                    alarmAudio.load(); // Принудительно перезагружаем файл в память
-                    alarmAudio.play().catch(e => console.log("Браузер заблокировал автозвук"));
+                    alarmAudio.load(); 
+                    alarmAudio.play().catch(e => console.log("Браузер заблокировал звук"));
                     
                     sendNotification("Чебурашка зовёт!", "Друг, пора размяться!");
                 } else {
@@ -320,12 +316,10 @@
             notificationSent = false;
         }
 
-        // Тестовое прослушивание сигнала прямо при выборе в меню!
         soundSelect.addEventListener('change', () => {
             alarmAudio.src = soundSelect.value;
             alarmAudio.load();
-            alarmAudio.play().catch(e => console.log("Кликните по экрану для теста звука"));
-            // Выключаем через 2 секунды, чтобы не надоедал
+            alarmAudio.play().catch(e => console.log("Кликните по экрану для теста"));
             setTimeout(() => { alarmAudio.pause(); alarmAudio.currentTime = 0; }, 2000);
         });
 
